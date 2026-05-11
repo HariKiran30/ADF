@@ -1,0 +1,142 @@
+{
+	"name": "PL_COPY_MULTI_FORMAT_FILES",
+	"properties": {
+		"activities": [
+			{
+				"name": "FilterFilesMulti",
+				"type": "Filter",
+				"dependsOn": [
+					{
+						"activity": "GetMetadataofRawFolder",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('GetMetadataofRawFolder').output.childItems",
+						"type": "Expression"
+					},
+					"condition": {
+						"value": "@or(or(endsWith(item().name,'.csv'),endsWith(item().name,'.json')),or(endsWith(item().name,'.txt'),endsWith(item().name,'.parquet')))",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "GetMetadataofRawFolder",
+				"type": "GetMetadata",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "DS_SRC_METADATA_MULTI",
+						"type": "DatasetReference"
+					},
+					"fieldList": [
+						"childItems"
+					],
+					"storeSettings": {
+						"type": "AzureBlobFSReadSettings",
+						"enablePartitionDiscovery": false
+					},
+					"formatSettings": {
+						"type": "BinaryReadSettings"
+					}
+				}
+			},
+			{
+				"name": "ForEach1",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "FilterFilesMulti",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('GetMetadataofRawFolder').output.childItems",
+						"type": "Expression"
+					},
+					"batchCount": 10,
+					"activities": [
+						{
+							"name": "Copy data1",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "BinarySource",
+									"storeSettings": {
+										"type": "AzureBlobFSReadSettings",
+										"recursive": true
+									},
+									"formatSettings": {
+										"type": "BinaryReadSettings"
+									}
+								},
+								"sink": {
+									"type": "BinarySink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									}
+								},
+								"enableStaging": false
+							},
+							"inputs": [
+								{
+									"referenceName": "DS_SRC_ADLS_MULTIPLE_FILES",
+									"type": "DatasetReference",
+									"parameters": {
+										"SRC_FILE_NAME": {
+											"value": "@item().name",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DS_TRGT_ADLS_MULTIPLE_FILES",
+									"type": "DatasetReference",
+									"parameters": {
+										"TRGT_FILENAME": {
+											"value": "@item().name",
+											"type": "Expression"
+										},
+										"TRGT_FOLDER": {
+											"value": "@concat('Processed',toUpper(substring(last(split(item().name,'.')),0,1)),substring(last(split(item().name,'.')),1,sub(length(last(split(item().name,'.'))),1)),'Files')",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"annotations": []
+	}
+}

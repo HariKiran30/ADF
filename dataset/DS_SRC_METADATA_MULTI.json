@@ -1,0 +1,21 @@
+{
+	"name": "DS_SRC_METADATA_MULTI",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ADLS_GEN2",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "ADLS"
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": "raw",
+				"fileSystem": "hk-quant-container"
+			}
+		}
+	}
+}

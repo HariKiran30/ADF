@@ -51,7 +51,7 @@
 					"batchCount": 20,
 					"activities": [
 						{
-							"name": "Switch1",
+							"name": "Switch",
 							"type": "Switch",
 							"dependsOn": [],
 							"userProperties": [],
@@ -101,7 +101,7 @@
 														"type": "DatasetReference",
 														"parameters": {
 															"SRC_FileName": {
-																"value": "@item.name()",
+																"value": "@item().name",
 																"type": "Expression"
 															}
 														}

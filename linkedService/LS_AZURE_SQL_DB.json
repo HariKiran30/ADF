@@ -1,0 +1,17 @@
+{
+	"name": "LS_AZURE_SQL_DB",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "AzureSqlDatabase",
+		"typeProperties": {
+			"server": "hk-server.database.windows.net",
+			"database": "hkDB",
+			"encrypt": "mandatory",
+			"trustServerCertificate": true,
+			"authenticationType": "SQL",
+			"userName": "HK",
+			"encryptedCredential": "ew0KICAiVmVyc2lvbiI6ICIyMDE3LTExLTMwIiwNCiAgIlByb3RlY3Rpb25Nb2RlIjogIktleSIsDQogICJTZWNyZXRDb250ZW50VHlwZSI6ICJQbGFpbnRleHQiLA0KICAiQ3JlZGVudGlhbElkIjogIkRBVEFGQUNUT1JZQEU3MjUwNjYzLTlCQ0YtNDk2NC05REVCLTlCQkRGNTQ3QTc0Nl81NmFmYzI3OS02NTc2LTRiM2YtYWRjMy0xMjFiMzIzYWZkN2MiDQp9"
+		}
+	}
+}

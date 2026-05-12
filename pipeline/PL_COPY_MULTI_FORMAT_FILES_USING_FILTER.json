@@ -1,5 +1,5 @@
 {
-	"name": "PL_COPY_MULTI_FORMAT_FILES",
+	"name": "PL_COPY_MULTI_FORMAT_FILES_USING_FILTER",
 	"properties": {
 		"activities": [
 			{

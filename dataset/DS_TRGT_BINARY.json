@@ -23,7 +23,7 @@
 					"type": "Expression"
 				},
 				"folderPath": {
-					"value": "@concat('Processed2/',dataset().TRGT_FOLDER)",
+					"value": "@concat('Processeddd/',dataset().TRGT_FOLDER)",
 					"type": "Expression"
 				},
 				"fileSystem": "hk-quant-container"

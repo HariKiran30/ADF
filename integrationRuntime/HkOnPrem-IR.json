@@ -1,0 +1,6 @@
+{
+	"name": "HkOnPrem-IR",
+	"properties": {
+		"type": "SelfHosted"
+	}
+}

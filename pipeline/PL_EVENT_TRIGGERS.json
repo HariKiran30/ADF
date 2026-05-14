@@ -1,0 +1,136 @@
+{
+	"name": "PL_EVENT_TRIGGERS",
+	"properties": {
+		"activities": [
+			{
+				"name": "CopyCreatedFiles",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "ParquetSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "ParquetWriteSettings"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_SRC_ET",
+						"type": "DatasetReference",
+						"parameters": {
+							"src_filename": {
+								"value": "@pipeline().parameters.src_file_name",
+								"type": "Expression"
+							},
+							"src_foldername": {
+								"value": "@pipeline().parameters.src_folder_name",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_TRGT_ET_PARQUET",
+						"type": "DatasetReference",
+						"parameters": {
+							"trgt_file_name": {
+								"value": "@replace(pipeline().parameters.src_file_name,'.csv','')",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "DeleteFileSrc",
+				"type": "Delete",
+				"dependsOn": [
+					{
+						"activity": "CopyCreatedFiles",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "DS_SRC_ET",
+						"type": "DatasetReference",
+						"parameters": {
+							"src_filename": {
+								"value": "@pipeline().parameters.src_folder_name",
+								"type": "Expression"
+							},
+							"src_foldername": {
+								"value": "@pipeline().parameters.src_file_name",
+								"type": "Expression"
+							}
+						}
+					},
+					"logStorageSettings": {
+						"linkedServiceName": {
+							"referenceName": "LS_ADLS_GEN2",
+							"type": "LinkedServiceReference"
+						}
+					},
+					"enableLogging": true,
+					"storeSettings": {
+						"type": "AzureBlobFSReadSettings",
+						"recursive": true,
+						"enablePartitionDiscovery": false
+					}
+				}
+			}
+		],
+		"parameters": {
+			"src_file_name": {
+				"type": "string"
+			},
+			"src_folder_name": {
+				"type": "string"
+			}
+		},
+		"annotations": []
+	}
+}

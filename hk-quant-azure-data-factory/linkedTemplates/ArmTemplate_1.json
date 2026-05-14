@@ -22,6 +22,18 @@
 		"LS_ONPREM_SQL_SEREVR_properties_typeProperties_userName": {
 			"type": "string",
 			"defaultValue": "userAdf1"
+		},
+		"EventBasedTriggerADLS_properties_PL_EVENT_TRIGGERS_parameters_src_file_name": {
+			"type": "string",
+			"defaultValue": "@triggerBody().fileName"
+		},
+		"EventBasedTriggerADLS_properties_PL_EVENT_TRIGGERS_parameters_src_folder_name": {
+			"type": "string",
+			"defaultValue": "@triggerBody().folderPath"
+		},
+		"EventBasedTriggerADLS_properties_typeProperties_scope": {
+			"type": "string",
+			"defaultValue": "/subscriptions/d1ebf0bc-a6d8-44f7-ba99-6f6e86c47ac5/resourceGroups/rg-quantcloud-technologies/providers/Microsoft.Storage/storageAccounts/hkquantstorageaccount"
 		}
 	},
 	"variables": {
@@ -1628,6 +1640,40 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/DS_ONPREM_SQL')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/EventBasedTriggerADLS')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_EVENT_TRIGGERS",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"src_file_name": "[parameters('EventBasedTriggerADLS_properties_PL_EVENT_TRIGGERS_parameters_src_file_name')]",
+							"src_folder_name": "[parameters('EventBasedTriggerADLS_properties_PL_EVENT_TRIGGERS_parameters_src_folder_name')]"
+						}
+					}
+				],
+				"type": "BlobEventsTrigger",
+				"typeProperties": {
+					"blobPathBeginsWith": "/hk-quant-container/blobs/raw_a/",
+					"blobPathEndsWith": ".csv",
+					"ignoreEmptyBlobs": true,
+					"scope": "[parameters('EventBasedTriggerADLS_properties_typeProperties_scope')]",
+					"events": [
+						"Microsoft.Storage.BlobCreated"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_EVENT_TRIGGERS')]"
 			]
 		}
 	]

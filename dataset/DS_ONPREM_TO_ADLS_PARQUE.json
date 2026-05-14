@@ -1,0 +1,29 @@
+{
+	"name": "DS_ONPREM_TO_ADLS_PARQUE",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ADLS_GEN2",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"TRGT_FILENAME": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": {
+					"value": "@dataset().TRGT_FILENAME",
+					"type": "Expression"
+				},
+				"folderPath": "ONPREM_SQL_TABLES",
+				"fileSystem": "hk-quant-container"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": []
+	}
+}

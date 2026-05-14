@@ -1,0 +1,30 @@
+{
+	"name": "DS_ONPREM_SQL",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ONPREM_SQL_SEREVR",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"SRC_TABLE_SCHEMA": {
+				"type": "string"
+			},
+			"SRC_TABLE_NAME": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": {
+				"value": "@dataset().SRC_TABLE_SCHEMA",
+				"type": "Expression"
+			},
+			"table": {
+				"value": "@dataset().SRC_TABLE_NAME",
+				"type": "Expression"
+			}
+		}
+	}
+}

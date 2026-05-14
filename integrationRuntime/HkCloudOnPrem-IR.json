@@ -1,0 +1,6 @@
+{
+	"name": "HkCloudOnPrem-IR",
+	"properties": {
+		"type": "SelfHosted"
+	}
+}

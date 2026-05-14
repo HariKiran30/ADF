@@ -8,8 +8,32 @@
 		"LS_ADLS_GEN2_accountKey": {
 			"value": ""
 		},
+		"LS_AZURE_SQL_DB_password": {
+			"value": ""
+		},
+		"LS_ONPREM_SQL_SEREVR_password": {
+			"value": ""
+		},
 		"LS_ADLS_GEN2_properties_typeProperties_url": {
 			"value": "https://hkquantstorageaccount.dfs.core.windows.net/"
+		},
+		"LS_AZURE_SQL_DB_properties_typeProperties_server": {
+			"value": "hk-server.database.windows.net"
+		},
+		"LS_AZURE_SQL_DB_properties_typeProperties_database": {
+			"value": "hkDB"
+		},
+		"LS_AZURE_SQL_DB_properties_typeProperties_userName": {
+			"value": "HK"
+		},
+		"LS_ONPREM_SQL_SEREVR_properties_typeProperties_server": {
+			"value": "DESKTOP-VD69ORK"
+		},
+		"LS_ONPREM_SQL_SEREVR_properties_typeProperties_database": {
+			"value": "AdventureWorksL"
+		},
+		"LS_ONPREM_SQL_SEREVR_properties_typeProperties_userName": {
+			"value": "userAdf1"
 		}
 	}
 }

@@ -11,9 +11,41 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'accountKey' of 'LS_ADLS_GEN2'"
 		},
+		"LS_AZURE_SQL_DB_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'LS_AZURE_SQL_DB'"
+		},
+		"LS_ONPREM_SQL_SEREVR_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'LS_ONPREM_SQL_SEREVR'"
+		},
 		"LS_ADLS_GEN2_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://hkquantstorageaccount.dfs.core.windows.net/"
+		},
+		"LS_AZURE_SQL_DB_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "hk-server.database.windows.net"
+		},
+		"LS_AZURE_SQL_DB_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "hkDB"
+		},
+		"LS_AZURE_SQL_DB_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "HK"
+		},
+		"LS_ONPREM_SQL_SEREVR_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "DESKTOP-VD69ORK"
+		},
+		"LS_ONPREM_SQL_SEREVR_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "AdventureWorksL"
+		},
+		"LS_ONPREM_SQL_SEREVR_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "userAdf1"
 		},
 		"containerUri": {
 			"type": "string",
@@ -45,12 +77,56 @@
 					"LS_ADLS_GEN2_accountKey": {
 						"value": "[parameters('LS_ADLS_GEN2_accountKey')]"
 					},
+					"LS_AZURE_SQL_DB_password": {
+						"value": "[parameters('LS_AZURE_SQL_DB_password')]"
+					},
 					"LS_ADLS_GEN2_properties_typeProperties_url": {
 						"value": "[parameters('LS_ADLS_GEN2_properties_typeProperties_url')]"
+					},
+					"LS_AZURE_SQL_DB_properties_typeProperties_server": {
+						"value": "[parameters('LS_AZURE_SQL_DB_properties_typeProperties_server')]"
+					},
+					"LS_AZURE_SQL_DB_properties_typeProperties_database": {
+						"value": "[parameters('LS_AZURE_SQL_DB_properties_typeProperties_database')]"
+					},
+					"LS_AZURE_SQL_DB_properties_typeProperties_userName": {
+						"value": "[parameters('LS_AZURE_SQL_DB_properties_typeProperties_userName')]"
 					}
 				}
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "hk-quant-azure-data-factory_ArmTemplate_1",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2024-03-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_1.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"LS_ONPREM_SQL_SEREVR_password": {
+						"value": "[parameters('LS_ONPREM_SQL_SEREVR_password')]"
+					},
+					"LS_ONPREM_SQL_SEREVR_properties_typeProperties_server": {
+						"value": "[parameters('LS_ONPREM_SQL_SEREVR_properties_typeProperties_server')]"
+					},
+					"LS_ONPREM_SQL_SEREVR_properties_typeProperties_database": {
+						"value": "[parameters('LS_ONPREM_SQL_SEREVR_properties_typeProperties_database')]"
+					},
+					"LS_ONPREM_SQL_SEREVR_properties_typeProperties_userName": {
+						"value": "[parameters('LS_ONPREM_SQL_SEREVR_properties_typeProperties_userName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'hk-quant-azure-data-factory_ArmTemplate_0')]"
+			]
 		}
 	]
 }

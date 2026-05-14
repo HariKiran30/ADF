@@ -1028,14 +1028,12 @@
 											"partitionOption": "None"
 										},
 										"sink": {
-											"type": "DelimitedTextSink",
+											"type": "ParquetSink",
 											"storeSettings": {
 												"type": "AzureBlobFSWriteSettings"
 											},
 											"formatSettings": {
-												"type": "DelimitedTextWriteSettings",
-												"quoteAllText": true,
-												"fileExtension": ".txt"
+												"type": "ParquetWriteSettings"
 											}
 										},
 										"enableStaging": false,
@@ -1066,11 +1064,11 @@
 									],
 									"outputs": [
 										{
-											"referenceName": "DS_ONPREM_TO_ADLS_CSV",
+											"referenceName": "DS_ONPREM_TO_ADLS_PARQUE",
 											"type": "DatasetReference",
 											"parameters": {
-												"Trgt_Filename": {
-													"value": "@concat(item().table_name,'.csv')",
+												"TRGT_FILENAME": {
+													"value": "@concat(item().table_name,'.parquet')",
 													"type": "Expression"
 												}
 											}
@@ -1088,7 +1086,7 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/DS_ONPREM_SQL')]",
-				"[concat(variables('factoryId'), '/datasets/DS_ONPREM_TO_ADLS_CSV')]"
+				"[concat(variables('factoryId'), '/datasets/DS_ONPREM_TO_ADLS_PARQUE')]"
 			]
 		},
 		{
@@ -1538,7 +1536,7 @@
 							"value": "@dataset().TRGT_FILENAME",
 							"type": "Expression"
 						},
-						"folderPath": "ONPREM_SQL_TABLES",
+						"folderPath": "ONPREM_SQL_TABLES_PARQUET",
 						"fileSystem": "hk-quant-container"
 					},
 					"compressionCodec": "snappy"

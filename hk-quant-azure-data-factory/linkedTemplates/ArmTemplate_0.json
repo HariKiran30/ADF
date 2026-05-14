@@ -223,7 +223,7 @@
 							"value": "@dataset().TRGT_FILENAME",
 							"type": "Expression"
 						},
-						"folderPath": "ONPREM_SQL_TABLES",
+						"folderPath": "ONPREM_SQL_TABLES_PARQUET",
 						"fileSystem": "hk-quant-container"
 					},
 					"compressionCodec": "snappy"

@@ -94,11 +94,11 @@
 									"type": "DatasetReference",
 									"parameters": {
 										"SRC_TABLE_SCHEMA": {
-											"value": "@item().SRC_TABLE_SCHEMA",
+											"value": "@item().table_schema",
 											"type": "Expression"
 										},
 										"SRC_TABLE_NAME": {
-											"value": "@item().SRC_TABLE_NAME",
+											"value": "@item().table_name",
 											"type": "Expression"
 										}
 									}
@@ -110,7 +110,7 @@
 									"type": "DatasetReference",
 									"parameters": {
 										"TRGT_FILENAME": {
-											"value": "@item().TRGT_FILENAME",
+											"value": "@concat(item().table_name,'.parquet')",
 											"type": "Expression"
 										}
 									}

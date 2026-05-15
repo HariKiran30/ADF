@@ -1,0 +1,35 @@
+{
+	"name": "DS_SRC_PRC_CSV",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ADLS_GEN2",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"SRC_PRC_FILENAME": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "ADLS_PRC"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": {
+					"value": "@dataset().SRC_PRC_FILENAME",
+					"type": "Expression"
+				},
+				"folderPath": "DIR_CSV_files",
+				"fileSystem": "hk-quant-container"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}

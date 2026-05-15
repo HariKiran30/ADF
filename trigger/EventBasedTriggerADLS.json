@@ -16,7 +16,7 @@
 			},
 			{
 				"pipelineReference": {
-					"referenceName": "PL_CSV_TO_PARQUET_DYNAMIC",
+					"referenceName": "PL_CSV_TO_PARQUET_DYNAMic_EVENT_TRIGGER",
 					"type": "PipelineReference"
 				}
 			}

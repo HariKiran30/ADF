@@ -18,16 +18,12 @@
 				"pipelineReference": {
 					"referenceName": "PL_CSV_TO_PARQUET_DYNAMIC",
 					"type": "PipelineReference"
-				},
-				"parameters": {
-					"P_FOLDER_PATH": "@triggerBody().folderPath",
-					"P_FILE_NAME": "@triggerBody().fileName"
 				}
 			}
 		],
 		"type": "BlobEventsTrigger",
 		"typeProperties": {
-			"blobPathBeginsWith": "/hk-quant-container/blobs/DIR_CSV_files",
+			"blobPathBeginsWith": "/hk-quant-container/blobs/raw_a/",
 			"blobPathEndsWith": ".csv",
 			"ignoreEmptyBlobs": true,
 			"scope": "/subscriptions/d1ebf0bc-a6d8-44f7-ba99-6f6e86c47ac5/resourceGroups/rg-quantcloud-technologies/providers/Microsoft.Storage/storageAccounts/hkquantstorageaccount",

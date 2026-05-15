@@ -63,7 +63,7 @@
 						"type": "DatasetReference",
 						"parameters": {
 							"TRGT_FOLDER": {
-								"value": "@concat( 'processed_Parq01/', formatDateTime(utcNow(),'yyyy/MM/dd/') )",
+								"value": "@concat( 'processed_Parqq/', formatDateTime(utcNow(),'yyyy/MM/dd/') )",
 								"type": "Expression"
 							},
 							"TRGT_FILE_NAME": {

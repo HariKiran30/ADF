@@ -1,5 +1,5 @@
 {
-	"name": "PL_CSV_TO_PARQUET_DYNAMIC",
+	"name": "PL_CSV_TO_PARQUET",
 	"properties": {
 		"activities": [
 			{

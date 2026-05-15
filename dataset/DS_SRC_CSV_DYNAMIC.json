@@ -1,12 +1,12 @@
 {
-	"name": "DS_SRC_PRC_CSV",
+	"name": "DS_SRC_CSV_DYNAMIC",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "LS_ADLS_GEN2",
 			"type": "LinkedServiceReference"
 		},
 		"parameters": {
-			"SRC_PRC_FILENAME": {
+			"SRC_FILENAME": {
 				"type": "string"
 			}
 		},
@@ -19,7 +19,7 @@
 			"location": {
 				"type": "AzureBlobFSLocation",
 				"fileName": {
-					"value": "@dataset().SRC_PRC_FILENAME",
+					"value": "@dataset().SRC_FILENAME",
 					"type": "Expression"
 				},
 				"folderPath": "DIR_CSV_files",

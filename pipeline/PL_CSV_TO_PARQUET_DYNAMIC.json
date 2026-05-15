@@ -1,9 +1,9 @@
 {
-	"name": "PL_CSV_TO_PARQUET",
+	"name": "PL_CSV_TO_PARQUET_DYNAMIC",
 	"properties": {
 		"activities": [
 			{
-				"name": "CopyCreatedFiles",
+				"name": "CopyCsvToParquet",
 				"type": "Copy",
 				"dependsOn": [],
 				"policy": {
@@ -47,11 +47,11 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "DS_SRC_PRC_CSV",
+						"referenceName": "DS_SRC_CSV_DYNAMIC",
 						"type": "DatasetReference",
 						"parameters": {
-							"SRC_PRC_FILENAME": {
-								"value": "@pipeline().parameters.Src_file",
+							"SRC_FILENAME": {
+								"value": "@pipeline().parameters.P_FILE_NAME",
 								"type": "Expression"
 							}
 						}
@@ -63,11 +63,11 @@
 						"type": "DatasetReference",
 						"parameters": {
 							"TRGT_FOLDER": {
-								"value": "trgt\n",
+								"value": "@concat( 'processed_Parq/', formatDateTime(utcNow(),'yyyy/MM/dd/') )",
 								"type": "Expression"
 							},
 							"TRGT_FILE_NAME": {
-								"value": "@replace(pipeline().parameters.Src_file,'.csv', '.parquet')\n",
+								"value": "@concat(\nreplace(pipeline().parameters.P_FILE_NAME,'.csv',''),\n'_',\nformatDateTime(utcNow(),'yyyyMMddHHmmss'),\n'.parquet'\n)",
 								"type": "Expression"
 							}
 						}
@@ -75,11 +75,11 @@
 				]
 			},
 			{
-				"name": "Delete1",
+				"name": "DELETE_SOURCE_FILE",
 				"type": "Delete",
 				"dependsOn": [
 					{
-						"activity": "CopyCreatedFiles",
+						"activity": "CopyCsvToParquet",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -95,10 +95,10 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataset": {
-						"referenceName": "DS_SRC_PRC_CSV",
+						"referenceName": "DS_SRC_CSV_DYNAMIC",
 						"type": "DatasetReference",
 						"parameters": {
-							"SRC_PRC_FILENAME": "@pipeline().parameters.SourceFile"
+							"SRC_FILENAME": "@pipeline().parameters.P_FILE_NAME"
 						}
 					},
 					"logStorageSettings": {
@@ -117,10 +117,10 @@
 			}
 		],
 		"parameters": {
-			"Src_Folder": {
+			"P_FOLDER_PATH": {
 				"type": "string"
 			},
-			"Src_file": {
+			"P_FILE_NAME": {
 				"type": "string"
 			}
 		},

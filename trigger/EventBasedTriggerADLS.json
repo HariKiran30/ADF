@@ -16,12 +16,8 @@
 			},
 			{
 				"pipelineReference": {
-					"referenceName": "PL_CSV_TO_PARQUET",
+					"referenceName": "PL_CSV_TO_PARQUET_DYNAMIC",
 					"type": "PipelineReference"
-				},
-				"parameters": {
-					"Src_Folder": "@triggerBody().folderPath\n",
-					"Src_file": "@triggerBody().fileName\n"
 				}
 			}
 		],

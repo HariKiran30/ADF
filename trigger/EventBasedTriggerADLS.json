@@ -18,6 +18,10 @@
 				"pipelineReference": {
 					"referenceName": "PL_CSV_TO_PARQUET_DYNAMIC",
 					"type": "PipelineReference"
+				},
+				"parameters": {
+					"P_FOLDER_PATH": "@triggerBody().folderPath",
+					"P_FILE_NAME": "@triggerBody().fileName"
 				}
 			}
 		],

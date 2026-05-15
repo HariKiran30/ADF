@@ -2501,11 +2501,11 @@
 								"type": "DatasetReference",
 								"parameters": {
 									"TRGT_FOLDER": {
-										"value": "@concat( 'processed_Parq/', formatDateTime(utcNow(),'yyyy/MM/dd/') )",
+										"value": "@concat( 'processed_Parqq/', formatDateTime(utcNow(),'yyyy/MM/dd/') )",
 										"type": "Expression"
 									},
 									"TRGT_FILE_NAME": {
-										"value": "@concat(\nreplace(pipeline().parameters.P_FILE_NAME,'.csv',''),\n'_',\nformatDateTime(utcNow(),'yyyyMMddHHmmss'),\n'.parquet'\n)",
+										"value": "@concat(\nreplace(pipeline().parameters.P_FILE_NAME,'.csv',''),\n'_',\nformatDateTime(utcNow(),'yyyyMMdd'),\n'.parquet'\n)",
 										"type": "Expression"
 									}
 								}

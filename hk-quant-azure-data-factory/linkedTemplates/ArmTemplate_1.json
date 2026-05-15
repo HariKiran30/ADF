@@ -31,6 +31,14 @@
 			"type": "string",
 			"defaultValue": "@triggerBody().folderPath"
 		},
+		"EventBasedTriggerADLS_properties_PL_CSV_TO_PARQUET_DYNAMIC_parameters_P_FOLDER_PATH": {
+			"type": "string",
+			"defaultValue": "@triggerBody().folderPath"
+		},
+		"EventBasedTriggerADLS_properties_PL_CSV_TO_PARQUET_DYNAMIC_parameters_P_FILE_NAME": {
+			"type": "string",
+			"defaultValue": "@triggerBody().fileName"
+		},
 		"EventBasedTriggerADLS_properties_typeProperties_scope": {
 			"type": "string",
 			"defaultValue": "/subscriptions/d1ebf0bc-a6d8-44f7-ba99-6f6e86c47ac5/resourceGroups/rg-quantcloud-technologies/providers/Microsoft.Storage/storageAccounts/hkquantstorageaccount"
@@ -40,6 +48,45 @@
 		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
 	},
 	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_TRGT_ADLS_MULTIPLE_FILES')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ADLS_GEN2",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"TRGT_FILENAME": {
+						"type": "string"
+					},
+					"TRGT_FOLDER": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "ADLS"
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().TRGT_FILENAME",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().TRGT_FOLDER",
+							"type": "Expression"
+						},
+						"fileSystem": "hk-quant-container"
+					}
+				}
+			},
+			"dependsOn": []
+		},
 		{
 			"name": "[concat(parameters('factoryName'), '/DS_TRGT_BINARY')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
@@ -77,6 +124,38 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/DS_TRGT_ET_PARQUET')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ADLS_GEN2",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"trgt_file_name": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().trgt_file_name",
+							"type": "Expression"
+						},
+						"folderPath": "ready_a",
+						"fileSystem": "hk-quant-container"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/LS_ONPREM_SQL_SEREVR')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
@@ -103,7 +182,7 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/DS_SRC_ET')]",
+			"name": "[concat(parameters('factoryName'), '/DS_SRC_CSV_DYNAMIC')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -112,12 +191,12 @@
 					"type": "LinkedServiceReference"
 				},
 				"parameters": {
-					"src_filename": {
-						"type": "string"
-					},
-					"src_foldername": {
+					"SRC_FILENAME": {
 						"type": "string"
 					}
+				},
+				"folder": {
+					"name": "ADLS_PRC"
 				},
 				"annotations": [],
 				"type": "DelimitedText",
@@ -125,13 +204,10 @@
 					"location": {
 						"type": "AzureBlobFSLocation",
 						"fileName": {
-							"value": "@dataset().src_filename",
+							"value": "@dataset().SRC_FILENAME",
 							"type": "Expression"
 						},
-						"folderPath": {
-							"value": "@dataset().src_foldername",
-							"type": "Expression"
-						},
+						"folderPath": "DIR_CSV_files",
 						"fileSystem": "hk-quant-container"
 					},
 					"columnDelimiter": ",",
@@ -144,7 +220,7 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/DS_TRGT_ET_PARQUET')]",
+			"name": "[concat(parameters('factoryName'), '/DS_TRGT_PRC_PARQUET')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -153,9 +229,15 @@
 					"type": "LinkedServiceReference"
 				},
 				"parameters": {
-					"trgt_file_name": {
+					"TRGT_FOLDER": {
+						"type": "string"
+					},
+					"TRGT_FILE_NAME": {
 						"type": "string"
 					}
+				},
+				"folder": {
+					"name": "ADLS_PRC"
 				},
 				"annotations": [],
 				"type": "Parquet",
@@ -163,10 +245,13 @@
 					"location": {
 						"type": "AzureBlobFSLocation",
 						"fileName": {
-							"value": "@dataset().trgt_file_name",
+							"value": "@dataset().TRGT_FILE_NAME",
 							"type": "Expression"
 						},
-						"folderPath": "ready_a",
+						"folderPath": {
+							"value": "@dataset().TRGT_FOLDER",
+							"type": "Expression"
+						},
 						"fileSystem": "hk-quant-container"
 					},
 					"compressionCodec": "snappy"
@@ -564,6 +649,150 @@
 				"annotations": []
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_EVENT_TRIGGERS')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "CopyCreatedFiles",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "ParquetSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "ParquetWriteSettings"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DS_SRC_ET",
+								"type": "DatasetReference",
+								"parameters": {
+									"src_filename": {
+										"value": "@pipeline().parameters.src_file_name",
+										"type": "Expression"
+									},
+									"src_foldername": {
+										"value": "@pipeline().parameters.src_folder_name",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DS_TRGT_ET_PARQUET",
+								"type": "DatasetReference",
+								"parameters": {
+									"trgt_file_name": {
+										"value": "@replace(pipeline().parameters.src_file_name,'.csv','')",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "DeleteFileSrc",
+						"type": "Delete",
+						"dependsOn": [
+							{
+								"activity": "CopyCreatedFiles",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "DS_SRC_ET",
+								"type": "DatasetReference",
+								"parameters": {
+									"src_filename": {
+										"value": "@pipeline().parameters.src_folder_name",
+										"type": "Expression"
+									},
+									"src_foldername": {
+										"value": "@pipeline().parameters.src_file_name",
+										"type": "Expression"
+									}
+								}
+							},
+							"logStorageSettings": {
+								"linkedServiceName": {
+									"referenceName": "LS_ADLS_GEN2",
+									"type": "LinkedServiceReference"
+								}
+							},
+							"enableLogging": true,
+							"storeSettings": {
+								"type": "AzureBlobFSReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"src_file_name": {
+						"type": "string"
+					},
+					"src_folder_name": {
+						"type": "string"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_TRGT_ET_PARQUET')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/PL_MIGRATE_MULTIFORMAT_FILES')]",
@@ -1058,7 +1287,9 @@
 				},
 				"annotations": []
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_TRGT_ADLS_MULTIPLE_FILES')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/PL_SQL_TO_ADLS')]",
@@ -1364,13 +1595,13 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/PL_EVENT_TRIGGERS')]",
+			"name": "[concat(parameters('factoryName'), '/PL_CSV_TO_PARQUET_DYNAMIC')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"activities": [
 					{
-						"name": "CopyCreatedFiles",
+						"name": "CopyCsvToParquet",
 						"type": "Copy",
 						"dependsOn": [],
 						"policy": {
@@ -1414,15 +1645,11 @@
 						},
 						"inputs": [
 							{
-								"referenceName": "DS_SRC_ET",
+								"referenceName": "DS_SRC_CSV_DYNAMIC",
 								"type": "DatasetReference",
 								"parameters": {
-									"src_filename": {
-										"value": "@pipeline().parameters.src_file_name",
-										"type": "Expression"
-									},
-									"src_foldername": {
-										"value": "@pipeline().parameters.src_folder_name",
+									"SRC_FILENAME": {
+										"value": "@pipeline().parameters.P_FILE_NAME",
 										"type": "Expression"
 									}
 								}
@@ -1430,11 +1657,15 @@
 						],
 						"outputs": [
 							{
-								"referenceName": "DS_TRGT_ET_PARQUET",
+								"referenceName": "DS_TRGT_PRC_PARQUET",
 								"type": "DatasetReference",
 								"parameters": {
-									"trgt_file_name": {
-										"value": "@replace(pipeline().parameters.src_file_name,'.csv','')",
+									"TRGT_FOLDER": {
+										"value": "@concat( 'processed_Parq/', formatDateTime(utcNow(),'yyyy/MM/dd/') )",
+										"type": "Expression"
+									},
+									"TRGT_FILE_NAME": {
+										"value": "@concat(\nreplace(pipeline().parameters.P_FILE_NAME,'.csv',''),\n'_',\nformatDateTime(utcNow(),'yyyyMMddHHmmss'),\n'.parquet'\n)",
 										"type": "Expression"
 									}
 								}
@@ -1442,11 +1673,11 @@
 						]
 					},
 					{
-						"name": "DeleteFileSrc",
+						"name": "DELETE_SOURCE_FILE",
 						"type": "Delete",
 						"dependsOn": [
 							{
-								"activity": "CopyCreatedFiles",
+								"activity": "CopyCsvToParquet",
 								"dependencyConditions": [
 									"Succeeded"
 								]
@@ -1462,17 +1693,10 @@
 						"userProperties": [],
 						"typeProperties": {
 							"dataset": {
-								"referenceName": "DS_SRC_ET",
+								"referenceName": "DS_SRC_CSV_DYNAMIC",
 								"type": "DatasetReference",
 								"parameters": {
-									"src_filename": {
-										"value": "@pipeline().parameters.src_folder_name",
-										"type": "Expression"
-									},
-									"src_foldername": {
-										"value": "@pipeline().parameters.src_file_name",
-										"type": "Expression"
-									}
+									"SRC_FILENAME": "@pipeline().parameters.P_FILE_NAME"
 								}
 							},
 							"logStorageSettings": {
@@ -1494,18 +1718,18 @@
 					"elapsedTimeMetric": {}
 				},
 				"parameters": {
-					"src_file_name": {
+					"P_FOLDER_PATH": {
 						"type": "string"
 					},
-					"src_folder_name": {
+					"P_FILE_NAME": {
 						"type": "string"
 					}
 				},
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DS_SRC_ET')]",
-				"[concat(variables('factoryId'), '/datasets/DS_TRGT_ET_PARQUET')]"
+				"[concat(variables('factoryId'), '/datasets/DS_SRC_CSV_DYNAMIC')]",
+				"[concat(variables('factoryId'), '/datasets/DS_TRGT_PRC_PARQUET')]"
 			]
 		},
 		{
@@ -1659,11 +1883,21 @@
 							"src_file_name": "[parameters('EventBasedTriggerADLS_properties_PL_EVENT_TRIGGERS_parameters_src_file_name')]",
 							"src_folder_name": "[parameters('EventBasedTriggerADLS_properties_PL_EVENT_TRIGGERS_parameters_src_folder_name')]"
 						}
+					},
+					{
+						"pipelineReference": {
+							"referenceName": "PL_CSV_TO_PARQUET_DYNAMIC",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"P_FOLDER_PATH": "[parameters('EventBasedTriggerADLS_properties_PL_CSV_TO_PARQUET_DYNAMIC_parameters_P_FOLDER_PATH')]",
+							"P_FILE_NAME": "[parameters('EventBasedTriggerADLS_properties_PL_CSV_TO_PARQUET_DYNAMIC_parameters_P_FILE_NAME')]"
+						}
 					}
 				],
 				"type": "BlobEventsTrigger",
 				"typeProperties": {
-					"blobPathBeginsWith": "/hk-quant-container/blobs/raw_a/",
+					"blobPathBeginsWith": "/hk-quant-container/blobs/DIR_CSV_files",
 					"blobPathEndsWith": ".csv",
 					"ignoreEmptyBlobs": true,
 					"scope": "[parameters('EventBasedTriggerADLS_properties_typeProperties_scope')]",
@@ -1673,7 +1907,8 @@
 				}
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/PL_EVENT_TRIGGERS')]"
+				"[concat(variables('factoryId'), '/pipelines/PL_EVENT_TRIGGERS')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_CSV_TO_PARQUET_DYNAMIC')]"
 			]
 		}
 	]

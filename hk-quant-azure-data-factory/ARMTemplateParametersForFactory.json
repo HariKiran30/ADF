@@ -41,6 +41,12 @@
 		"EventBasedTriggerADLS_properties_PL_EVENT_TRIGGERS_parameters_src_folder_name": {
 			"value": "@triggerBody().folderPath"
 		},
+		"EventBasedTriggerADLS_properties_PL_CSV_TO_PARQUET_DYNAMIC_parameters_P_FOLDER_PATH": {
+			"value": "@triggerBody().folderPath"
+		},
+		"EventBasedTriggerADLS_properties_PL_CSV_TO_PARQUET_DYNAMIC_parameters_P_FILE_NAME": {
+			"value": "@triggerBody().fileName"
+		},
 		"EventBasedTriggerADLS_properties_typeProperties_scope": {
 			"value": "/subscriptions/d1ebf0bc-a6d8-44f7-ba99-6f6e86c47ac5/resourceGroups/rg-quantcloud-technologies/providers/Microsoft.Storage/storageAccounts/hkquantstorageaccount"
 		}

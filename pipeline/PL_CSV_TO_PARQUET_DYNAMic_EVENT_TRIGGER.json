@@ -112,7 +112,10 @@
 											"value": "@concat( 'processed_PARQ_Files_P/', formatDateTime(utcNow(),'yyyyMMdd/') )",
 											"type": "Expression"
 										},
-										"TRGT_FILE_NAME": "@item().name"
+										"TRGT_FILE_NAME": {
+											"value": "@concat(\nreplace(item().name,'.csv',''),\n'.parquet'\n)",
+											"type": "Expression"
+										}
 									}
 								}
 							]

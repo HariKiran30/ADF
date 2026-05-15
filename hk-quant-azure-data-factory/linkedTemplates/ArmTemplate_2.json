@@ -1,0 +1,67 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "hk-quant-azure-data-factory"
+		},
+		"EventBasedTriggerADLS_properties_PL_EVENT_TRIGGERS_parameters_src_file_name": {
+			"type": "string",
+			"defaultValue": "@triggerBody().fileName"
+		},
+		"EventBasedTriggerADLS_properties_PL_EVENT_TRIGGERS_parameters_src_folder_name": {
+			"type": "string",
+			"defaultValue": "@triggerBody().folderPath"
+		},
+		"EventBasedTriggerADLS_properties_typeProperties_scope": {
+			"type": "string",
+			"defaultValue": "/subscriptions/d1ebf0bc-a6d8-44f7-ba99-6f6e86c47ac5/resourceGroups/rg-quantcloud-technologies/providers/Microsoft.Storage/storageAccounts/hkquantstorageaccount"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/EventBasedTriggerADLS')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_EVENT_TRIGGERS",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"src_file_name": "[parameters('EventBasedTriggerADLS_properties_PL_EVENT_TRIGGERS_parameters_src_file_name')]",
+							"src_folder_name": "[parameters('EventBasedTriggerADLS_properties_PL_EVENT_TRIGGERS_parameters_src_folder_name')]"
+						}
+					},
+					{
+						"pipelineReference": {
+							"referenceName": "PL_CSV_TO_PARQUET_DYNAMIC",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "BlobEventsTrigger",
+				"typeProperties": {
+					"blobPathBeginsWith": "/hk-quant-container/blobs/raw_a/",
+					"blobPathEndsWith": ".csv",
+					"ignoreEmptyBlobs": true,
+					"scope": "[parameters('EventBasedTriggerADLS_properties_typeProperties_scope')]",
+					"events": [
+						"Microsoft.Storage.BlobCreated"
+					]
+				}
+			},
+			"dependsOn": []
+		}
+	]
+}

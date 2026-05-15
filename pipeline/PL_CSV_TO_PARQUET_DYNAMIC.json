@@ -32,7 +32,7 @@
 				}
 			},
 			{
-				"name": "ForEach1",
+				"name": "ForEachCsvFile",
 				"type": "ForEach",
 				"dependsOn": [
 					{
@@ -44,9 +44,14 @@
 				],
 				"userProperties": [],
 				"typeProperties": {
+					"items": {
+						"value": "@activity('GetMetadataOfCSVfilesFolder').output.childItems",
+						"type": "Expression"
+					},
+					"batchCount": 10,
 					"activities": [
 						{
-							"name": "Copy data1",
+							"name": "CopySrcFilesToParquet",
 							"type": "Copy",
 							"dependsOn": [],
 							"policy": {
@@ -58,13 +63,70 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
-								"enableStaging": false
-							}
+								"source": {
+									"type": "DelimitedTextSource",
+									"storeSettings": {
+										"type": "AzureBlobFSReadSettings",
+										"recursive": true,
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings"
+									}
+								},
+								"sink": {
+									"type": "ParquetSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									},
+									"formatSettings": {
+										"type": "ParquetWriteSettings"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "DS_SRC_CSV_DYNAMIC",
+									"type": "DatasetReference",
+									"parameters": {
+										"SRC_FILENAME": "@item().name"
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DS_TRGT_PRC_PARQUET",
+									"type": "DatasetReference",
+									"parameters": {
+										"TRGT_FOLDER": {
+											"value": "@concat( 'processed_PARQ_Files_P/', formatDateTime(utcNow(),'yyyyMMdd/') )",
+											"type": "Expression"
+										},
+										"TRGT_FILE_NAME": "@item().name"
+									}
+								}
+							]
 						},
 						{
-							"name": "Delete1",
+							"name": "DeleteSrcFiles",
 							"type": "Delete",
-							"dependsOn": [],
+							"dependsOn": [
+								{
+									"activity": "CopySrcFilesToParquet",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
 							"policy": {
 								"timeout": "0.12:00:00",
 								"retry": 0,
@@ -74,7 +136,25 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
-								"enableLogging": true
+								"dataset": {
+									"referenceName": "DS_SRC_CSV_DYNAMIC",
+									"type": "DatasetReference",
+									"parameters": {
+										"SRC_FILENAME": "@item().name"
+									}
+								},
+								"logStorageSettings": {
+									"linkedServiceName": {
+										"referenceName": "LS_ADLS_GEN2",
+										"type": "LinkedServiceReference"
+									}
+								},
+								"enableLogging": true,
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								}
 							}
 						}
 					]

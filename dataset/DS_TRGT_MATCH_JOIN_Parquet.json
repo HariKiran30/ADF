@@ -1,0 +1,24 @@
+{
+	"name": "DS_TRGT_MATCH_JOIN_Parquet",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ADLS_GEN2",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "DF_DS"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "joined_output.parquet",
+				"folderPath": "DF_DS",
+				"fileSystem": "hk-quant-container"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": []
+	}
+}

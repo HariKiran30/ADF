@@ -1,0 +1,153 @@
+{
+	"name": "dataflow1",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "DS_DF_SRC_TWO",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				},
+				{
+					"dataset": {
+						"referenceName": "DS_DF_SRC_ONE",
+						"type": "DatasetReference"
+					},
+					"name": "source2"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "DS_TRGT_MATCH_JOIN_Parquet",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "select1"
+				},
+				{
+					"name": "select2"
+				},
+				{
+					"name": "join1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          match_id as integer,",
+				"          inning as short,",
+				"          batting_team as string,",
+				"          bowling_team as string,",
+				"          over as short,",
+				"          ball as short,",
+				"          batter as string,",
+				"          bowler as string,",
+				"          non_striker as string,",
+				"          batsman_runs as short,",
+				"          extra_runs as short,",
+				"          total_runs as short,",
+				"          extras_type as string,",
+				"          is_wicket as boolean,",
+				"          player_dismissed as string,",
+				"          dismissal_kind as string,",
+				"          fielder as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     limit: 100,",
+				"     ignoreNoFilesFound: false) ~> source1",
+				"source(output(",
+				"          id as integer,",
+				"          season as string,",
+				"          city as string,",
+				"          date as date,",
+				"          match_type as string,",
+				"          player_of_match as string,",
+				"          venue as string,",
+				"          team1 as string,",
+				"          team2 as string,",
+				"          toss_winner as string,",
+				"          toss_decision as string,",
+				"          winner as string,",
+				"          result as string,",
+				"          result_margin as string,",
+				"          target_runs as string,",
+				"          target_overs as string,",
+				"          super_over as boolean,",
+				"          method as string,",
+				"          umpire1 as string,",
+				"          umpire2 as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> source2",
+				"source1 select(mapColumn(",
+				"          match_id,",
+				"          inning,",
+				"          batting_team,",
+				"          bowling_team,",
+				"          over,",
+				"          ball,",
+				"          batter,",
+				"          bowler,",
+				"          non_striker,",
+				"          batsman_runs,",
+				"          extra_runs,",
+				"          total_runs,",
+				"          extras_type,",
+				"          is_wicket,",
+				"          player_dismissed,",
+				"          dismissal_kind,",
+				"          fielder",
+				"     ),",
+				"     partitionBy('hash', 1),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"source2 select(mapColumn(",
+				"          id,",
+				"          season,",
+				"          city,",
+				"          date,",
+				"          match_type,",
+				"          player_of_match,",
+				"          venue,",
+				"          team1,",
+				"          team2,",
+				"          toss_winner,",
+				"          toss_decision,",
+				"          winner,",
+				"          result,",
+				"          result_margin,",
+				"          target_runs,",
+				"          target_overs,",
+				"          super_over,",
+				"          method,",
+				"          umpire1,",
+				"          umpire2",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select2",
+				"select1, select2 join(match_id == id,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join1",
+				"join1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink1"
+			]
+		}
+	}
+}

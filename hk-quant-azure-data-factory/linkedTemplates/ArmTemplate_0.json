@@ -164,6 +164,70 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/DS_DF_SRC_ONE')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ADLS_GEN2",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "DF_DS"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "matches.csv",
+						"folderPath": "DF_DS",
+						"fileSystem": "hk-quant-container"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_GEN2')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_DF_SRC_TWO')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ADLS_GEN2",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "DF_DS"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "deliveries.csv",
+						"folderPath": "DF_DS",
+						"fileSystem": "hk-quant-container"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_GEN2')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/DS_METADETA_CSV_TO_PARQUET')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -255,6 +319,108 @@
 						"fileSystem": "hk-quant-container"
 					},
 					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_GEN2')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_SIMPLE_MIGRATE_METADATA')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ADLS_GEN2",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "DIR_CSV_files",
+						"fileSystem": "hk-quant-container"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_GEN2')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_SIMPLE_MIGRATE_SRC')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ADLS_GEN2",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"src_file_name": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().src_file_name",
+							"type": "Expression"
+						},
+						"folderPath": "DIR_CSV_files",
+						"fileSystem": "hk-quant-container"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_GEN2')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_SIMPLE_MIGRATE_TRGT')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ADLS_GEN2",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"TRGT_FILE_NAME": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().TRGT_FILE_NAME",
+							"type": "Expression"
+						},
+						"folderPath": "CSV_FLOW_FILES",
+						"fileSystem": "hk-quant-container"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
 				},
 				"schema": []
 			},
@@ -505,213 +671,6 @@
 					"quoteChar": "\""
 				},
 				"schema": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_GEN2')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_SRC_ET')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_ADLS_GEN2",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"src_filename": {
-						"type": "string"
-					},
-					"src_foldername": {
-						"type": "string"
-					}
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"fileName": {
-							"value": "@dataset().src_filename",
-							"type": "Expression"
-						},
-						"folderPath": {
-							"value": "@dataset().src_foldername",
-							"type": "Expression"
-						},
-						"fileSystem": "hk-quant-container"
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"firstRowAsHeader": true,
-					"quoteChar": "\""
-				},
-				"schema": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_GEN2')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_SRC_METADATA_MULTI')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_ADLS_GEN2",
-					"type": "LinkedServiceReference"
-				},
-				"folder": {
-					"name": "ADLS"
-				},
-				"annotations": [],
-				"type": "Binary",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"folderPath": "raw",
-						"fileSystem": "hk-quant-container"
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_GEN2')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_SRC_META_MULTI_FILES')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_ADLS_GEN2",
-					"type": "LinkedServiceReference"
-				},
-				"folder": {
-					"name": "ADLS"
-				},
-				"annotations": [],
-				"type": "Binary",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"folderPath": "raw",
-						"fileSystem": "hk-quant-container"
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_GEN2')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_TARGET_ADLS_CSV_FILES')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_ADLS_GEN2",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"TRGT_FILE_NAME": {
-						"type": "string"
-					}
-				},
-				"folder": {
-					"name": "ADLS"
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"fileName": {
-							"value": "@dataset().TRGT_FILE_NAME",
-							"type": "Expression"
-						},
-						"folderPath": "ProcessedCsvFiles",
-						"fileSystem": "hk-quant-container"
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"firstRowAsHeader": true,
-					"quoteChar": "\""
-				},
-				"schema": [
-					{
-						"name": "Education",
-						"type": "String"
-					},
-					{
-						"name": "JoiningYear",
-						"type": "String"
-					},
-					{
-						"name": "City",
-						"type": "String"
-					},
-					{
-						"name": "PaymentTier",
-						"type": "String"
-					},
-					{
-						"name": "Age",
-						"type": "String"
-					},
-					{
-						"name": "Gender",
-						"type": "String"
-					},
-					{
-						"name": "EverBenched",
-						"type": "String"
-					},
-					{
-						"name": "ExperienceInCurrentDomain",
-						"type": "String"
-					},
-					{
-						"name": "LeaveOrNot",
-						"type": "String"
-					}
-				]
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_GEN2')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_TRGT_ADLS_BINARY_CSV')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_ADLS_GEN2",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"TRGT_FILE_NAME": {
-						"type": "string"
-					}
-				},
-				"folder": {
-					"name": "ADLS"
-				},
-				"annotations": [],
-				"type": "Binary",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"fileName": {
-							"value": "@dataset().TRGT_FILE_NAME",
-							"type": "Expression"
-						},
-						"folderPath": "ProcessedCsvFiles",
-						"fileSystem": "hk-quant-container"
-					}
-				}
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_GEN2')]"

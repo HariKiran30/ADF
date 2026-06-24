@@ -1,0 +1,27 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "hk-azure-data-factory"
+		},
+		"LS_ADLSGEN2_accountKey": {
+			"value": ""
+		},
+		"LS_Azure_SQLDB_password": {
+			"value": ""
+		},
+		"LS_ADLSGEN2_properties_typeProperties_url": {
+			"value": "https://hkcloudstorage.dfs.core.windows.net/"
+		},
+		"LS_Azure_SQLDB_properties_typeProperties_server": {
+			"value": "hk-sql-server.database.windows.net"
+		},
+		"LS_Azure_SQLDB_properties_typeProperties_database": {
+			"value": "HealthCareDB"
+		},
+		"LS_Azure_SQLDB_properties_typeProperties_userName": {
+			"value": "HK"
+		}
+	}
+}

@@ -1,0 +1,27 @@
+{
+	"name": "DS_SRC_SQL_DB_DYNAMIC",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_Azure_SQLDB",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"SchemaName": {
+				"type": "string"
+			},
+			"TableName": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "@dataset().SchemaName",
+			"table": {
+				"value": "@dataset().TableName",
+				"type": "Expression"
+			}
+		}
+	}
+}

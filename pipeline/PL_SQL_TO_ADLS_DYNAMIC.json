@@ -1,0 +1,118 @@
+{
+	"name": "PL_SQL_TO_ADLS_DYNAMIC",
+	"properties": {
+		"activities": [
+			{
+				"name": "LookUp_METADATA",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "SELECT *\nFROM Metadata_Config",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_SRC_SQL_DB_DYNAMIC",
+						"type": "DatasetReference",
+						"parameters": {
+							"SchemaName": "\"",
+							"TableName": "\""
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "ForEachTable",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "LookUp_METADATA",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('LookUp_METADATA').output.value",
+						"type": "Expression"
+					},
+					"batchCount": 10,
+					"activities": [
+						{
+							"name": "CopyTables",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "ParquetSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									},
+									"formatSettings": {
+										"type": "ParquetWriteSettings"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "DS_SRC_SQL_DB_DYNAMIC",
+									"type": "DatasetReference",
+									"parameters": {
+										"SchemaName": "@item().SchemaName",
+										"TableName": "@item().TableName"
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DC_TRGT_ADLS_Parquet",
+									"type": "DatasetReference",
+									"parameters": {
+										"FolderName": "FolderName = @concat('bronze/',item().TargetFolder)",
+										"FileName": "FileName = @concat(toLower(item().TableName),'.parquet')"
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"annotations": []
+	}
+}

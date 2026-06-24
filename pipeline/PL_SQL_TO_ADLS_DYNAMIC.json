@@ -103,8 +103,8 @@
 									"referenceName": "DC_TRGT_ADLS_Parquet",
 									"type": "DatasetReference",
 									"parameters": {
-										"FolderName": "FolderName = @concat('bronze/',item().TargetFolder)",
-										"FileName": "FileName = @concat(toLower(item().TableName),'.parquet')"
+										"FolderName": "@concat('bronze/',item().TargetFolder)",
+										"FileName": "@concat(toLower(item().TableName),'.parquet')"
 									}
 								}
 							]

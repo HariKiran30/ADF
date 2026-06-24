@@ -54,7 +54,14 @@
 						{
 							"name": "CopyTables",
 							"type": "Copy",
-							"dependsOn": [],
+							"dependsOn": [
+								{
+									"activity": "Lookup_Watermark",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
 							"policy": {
 								"timeout": "0.12:00:00",
 								"retry": 0,
@@ -66,6 +73,7 @@
 							"typeProperties": {
 								"source": {
 									"type": "AzureSqlSource",
+									"sqlReaderQuery": "@concat(\n'SELECT * FROM ',\nitem().SchemaName,\n'.',\nitem().TableName,\n' WHERE LastModifiedDate > ''',\nactivity('Lookup_Watermark').output.firstRow.LastLoadDate,\n''''\n)",
 									"queryTimeout": "02:00:00",
 									"partitionOption": "None"
 								},
@@ -108,6 +116,106 @@
 									}
 								}
 							]
+						},
+						{
+							"name": "Lookup_Watermark",
+							"description": "Get the last successful load timestamp\nfor the current table.",
+							"type": "Lookup",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"sqlReaderQuery": {
+										"value": "SELECT LastLoadDate\nFROM Watermark_Config\nWHERE TableName = '@{item().TableName}'",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"dataset": {
+									"referenceName": "DS_SRC_SQL_DB_DYNAMIC",
+									"type": "DatasetReference",
+									"parameters": {
+										"SchemaName": "\"",
+										"TableName": "\""
+									}
+								},
+								"firstRowOnly": false
+							}
+						},
+						{
+							"name": "Update_Watermark_Script",
+							"type": "Script",
+							"dependsOn": [
+								{
+									"activity": "CopyTables",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"linkedServiceName": {
+								"referenceName": "LS_Azure_SQLDB",
+								"type": "LinkedServiceReference"
+							},
+							"typeProperties": {
+								"scripts": [
+									{
+										"type": "Query",
+										"text": "UPDATE Watermark_Config\nSET LastLoadDate = GETDATE()\nWHERE TableName = '@{item().TableName}'"
+									}
+								],
+								"scriptBlockExecutionTimeout": "02:00:00"
+							}
+						},
+						{
+							"name": "Audit_log_Script",
+							"type": "Script",
+							"dependsOn": [
+								{
+									"activity": "Update_Watermark_Script",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"linkedServiceName": {
+								"referenceName": "LS_Azure_SQLDB",
+								"type": "LinkedServiceReference"
+							},
+							"typeProperties": {
+								"scripts": [
+									{
+										"type": "Query",
+										"text": "INSERT INTO Pipeline_Audit_Log\n(\n    TableName,\n    Status,\n    LoadTime\n)\nVALUES\n(\n    '@{item().TableName}',\n    'Success',\n    GETDATE()\n)"
+									}
+								],
+								"scriptBlockExecutionTimeout": "02:00:00"
+							}
 						}
 					]
 				}

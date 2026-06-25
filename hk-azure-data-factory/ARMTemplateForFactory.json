@@ -94,7 +94,14 @@
 								{
 									"name": "CopyTables",
 									"type": "Copy",
-									"dependsOn": [],
+									"dependsOn": [
+										{
+											"activity": "Lookup_Watermark",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
 									"policy": {
 										"timeout": "0.12:00:00",
 										"retry": 0,
@@ -106,6 +113,10 @@
 									"typeProperties": {
 										"source": {
 											"type": "AzureSqlSource",
+											"sqlReaderQuery": {
+												"value": "@concat(\n'SELECT * FROM ',\nitem().SchemaName,\n'.',\nitem().TableName,\n' WHERE LastModifiedDate > ''',\nactivity('Lookup_Watermark').output.value[0].LastLoadDate,\n''''\n)",
+												"type": "Expression"
+											},
 											"queryTimeout": "02:00:00",
 											"partitionOption": "None"
 										},
@@ -144,10 +155,153 @@
 											"type": "DatasetReference",
 											"parameters": {
 												"FolderName": "@concat('bronze/',item().TargetFolder)",
-												"FileName": "@concat(toLower(item().TableName),'.parquet')"
+												"FileName": {
+													"value": "@concat(\n    toLower(item().TableName),\n    '_',\n    formatDateTime(utcNow(),'yyyyMMdd_HHmmss'),\n    '.parquet'\n)",
+													"type": "Expression"
+												}
 											}
 										}
 									]
+								},
+								{
+									"name": "Lookup_Watermark",
+									"description": "Get the last successful load timestamp\nfor the current table.",
+									"type": "Lookup",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "AzureSqlSource",
+											"sqlReaderQuery": {
+												"value": "@concat(\n'SELECT LastLoadDate\nFROM Watermark_Config\nWHERE TableName = ''',\nitem().TableName,\n''''\n)",
+												"type": "Expression"
+											},
+											"queryTimeout": "02:00:00",
+											"partitionOption": "None"
+										},
+										"dataset": {
+											"referenceName": "DS_SRC_SQL_DB_DYNAMIC",
+											"type": "DatasetReference",
+											"parameters": {
+												"SchemaName": "\"",
+												"TableName": "\""
+											}
+										},
+										"firstRowOnly": false
+									}
+								},
+								{
+									"name": "Update_Watermark",
+									"type": "Script",
+									"dependsOn": [
+										{
+											"activity": "CopyTables",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"linkedServiceName": {
+										"referenceName": "LS_Azure_SQLDB",
+										"type": "LinkedServiceReference"
+									},
+									"typeProperties": {
+										"scripts": [
+											{
+												"type": "Query",
+												"text": {
+													"value": "UPDATE Watermark_Config\nSET LastLoadDate = GETDATE()\nWHERE TableName = '@{item().TableName}'",
+													"type": "Expression"
+												}
+											}
+										],
+										"scriptBlockExecutionTimeout": "02:00:00"
+									}
+								},
+								{
+									"name": "Audit_log",
+									"type": "Script",
+									"dependsOn": [
+										{
+											"activity": "Update_Watermark",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"linkedServiceName": {
+										"referenceName": "LS_Azure_SQLDB",
+										"type": "LinkedServiceReference"
+									},
+									"typeProperties": {
+										"scripts": [
+											{
+												"type": "Query",
+												"text": {
+													"value": "INSERT INTO Pipeline_Audit_Log\n(\n    TableName,\n    Status,\n    LoadTime\n)\nVALUES\n(\n    '@{item().TableName}',\n    'Success',\n    GETDATE()\n)",
+													"type": "Expression"
+												}
+											}
+										],
+										"scriptBlockExecutionTimeout": "02:00:00"
+									}
+								},
+								{
+									"name": "Lookup_Watermark_copy1",
+									"description": "Get the last successful load timestamp\nfor the current table.",
+									"type": "Lookup",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "AzureSqlSource",
+											"sqlReaderQuery": {
+												"value": "@concat(\n'SELECT LastLoadDate\nFROM Watermark_Config\nWHERE TableName = ''',\nitem().TableName,\n''''\n)",
+												"type": "Expression"
+											},
+											"queryTimeout": "02:00:00",
+											"partitionOption": "None"
+										},
+										"dataset": {
+											"referenceName": "DS_SRC_SQL_DB_DYNAMIC",
+											"type": "DatasetReference",
+											"parameters": {
+												"SchemaName": "\"",
+												"TableName": "\""
+											}
+										},
+										"firstRowOnly": false
+									}
 								}
 							]
 						}
@@ -160,7 +314,8 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/DS_SRC_SQL_DB_DYNAMIC')]",
-				"[concat(variables('factoryId'), '/datasets/DC_TRGT_ADLS_Parquet')]"
+				"[concat(variables('factoryId'), '/datasets/DC_TRGT_ADLS_Parquet')]",
+				"[concat(variables('factoryId'), '/linkedServices/LS_Azure_SQLDB')]"
 			]
 		},
 		{
@@ -433,6 +588,37 @@
 				}
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Schdule_Trigger_3hrs')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_SQL_TO_ADLS_DYNAMIC",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Hour",
+						"interval": 3,
+						"startTime": "2026-06-24T17:00:00",
+						"endTime": "2026-06-25T22:54:00",
+						"timeZone": "India Standard Time"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_SQL_TO_ADLS_DYNAMIC')]"
+			]
 		}
 	]
 }

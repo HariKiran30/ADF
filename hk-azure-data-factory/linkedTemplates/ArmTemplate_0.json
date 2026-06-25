@@ -76,6 +76,27 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/Schdule_Trigger_3hrs')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Hour",
+						"interval": 3,
+						"startTime": "2026-06-24T17:00:00",
+						"endTime": "2026-06-25T22:54:00",
+						"timeZone": "India Standard Time"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/DC_TRGT_ADLS_Parquet')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -243,6 +264,7 @@
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
+				"description": "Migrated data from Azure SQL Database to ADLS Gen2 (Parquet).\n\n• Metadata-driven dynamic pipeline\n• Lookup activity for metadata retrieval\n• ForEach for dynamic table processing\n• Parameterized datasets\n• Watermark-based incremental loading\n• Scheduled trigger\n• Audit logging\n• Bronze layer ingestion with timestamped Parquet files",
 				"activities": [
 					{
 						"name": "LookUp_METADATA",
@@ -587,37 +609,6 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/DS_SRC_SQLDB')]",
 				"[concat(variables('factoryId'), '/datasets/DS_TRGT_PARQUET')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/Schdule_Trigger_3hrs')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Started",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "PL_SQL_TO_ADLS_DYNAMIC",
-							"type": "PipelineReference"
-						},
-						"parameters": {}
-					}
-				],
-				"type": "ScheduleTrigger",
-				"typeProperties": {
-					"recurrence": {
-						"frequency": "Hour",
-						"interval": 3,
-						"startTime": "2026-06-24T17:00:00",
-						"endTime": "2026-06-25T22:54:00",
-						"timeZone": "India Standard Time"
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/PL_SQL_TO_ADLS_DYNAMIC')]"
 			]
 		}
 	]

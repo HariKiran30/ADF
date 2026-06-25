@@ -1,6 +1,7 @@
 {
 	"name": "PL_SQL_TO_ADLS_DYNAMIC",
 	"properties": {
+		"description": "Migrated data from Azure SQL Database to ADLS Gen2 (Parquet).\n\n• Metadata-driven dynamic pipeline\n• Lookup activity for metadata retrieval\n• ForEach for dynamic table processing\n• Parameterized datasets\n• Watermark-based incremental loading\n• Scheduled trigger\n• Audit logging\n• Bronze layer ingestion with timestamped Parquet files",
 		"activities": [
 			{
 				"name": "LookUp_METADATA",

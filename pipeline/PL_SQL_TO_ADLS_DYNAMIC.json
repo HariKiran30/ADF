@@ -74,7 +74,7 @@
 								"source": {
 									"type": "AzureSqlSource",
 									"sqlReaderQuery": {
-										"value": "@concat(\n'SELECT * FROM ',\nitem().SchemaName,\n'.',\nitem().TableName,\n' WHERE LastModifiedDate > ''',\nactivity('Lookup_Watermark').output.firstRow.LastLoadDate,\n''''\n)",
+										"value": "@concat(\n'SELECT * FROM ',\nitem().SchemaName,\n'.',\nitem().TableName,\n' WHERE LastModifiedDate > ''',\nactivity('Lookup_Watermark').output.value[0].LastLoadDate,\n''''\n)",
 										"type": "Expression"
 									},
 									"queryTimeout": "02:00:00",
@@ -115,7 +115,10 @@
 									"type": "DatasetReference",
 									"parameters": {
 										"FolderName": "@concat('bronze/',item().TargetFolder)",
-										"FileName": "@concat(toLower(item().TableName),'.parquet')"
+										"FileName": {
+											"value": "@concat(\n    toLower(item().TableName),\n    '_',\n    formatDateTime(utcNow(),'yyyyMMdd_HHmmss'),\n    '.parquet'\n)",
+											"type": "Expression"
+										}
 									}
 								}
 							]
@@ -137,7 +140,7 @@
 								"source": {
 									"type": "AzureSqlSource",
 									"sqlReaderQuery": {
-										"value": "@concat(\n'SELECT LastLoadDate FROM Watermark_Config WHERE TableName = ''',\nitem().TableName,\n''''\n)",
+										"value": "@concat(\n'SELECT LastLoadDate\nFROM Watermark_Config\nWHERE TableName = ''',\nitem().TableName,\n''''\n)",
 										"type": "Expression"
 									},
 									"queryTimeout": "02:00:00",
@@ -224,6 +227,40 @@
 									}
 								],
 								"scriptBlockExecutionTimeout": "02:00:00"
+							}
+						},
+						{
+							"name": "Lookup_Watermark_copy1",
+							"description": "Get the last successful load timestamp\nfor the current table.",
+							"type": "Lookup",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"sqlReaderQuery": {
+										"value": "@concat(\n'SELECT LastLoadDate\nFROM Watermark_Config\nWHERE TableName = ''',\nitem().TableName,\n''''\n)",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"dataset": {
+									"referenceName": "DS_SRC_SQL_DB_DYNAMIC",
+									"type": "DatasetReference",
+									"parameters": {
+										"SchemaName": "\"",
+										"TableName": "\""
+									}
+								},
+								"firstRowOnly": false
 							}
 						}
 					]

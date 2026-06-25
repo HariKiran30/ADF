@@ -73,7 +73,10 @@
 							"typeProperties": {
 								"source": {
 									"type": "AzureSqlSource",
-									"sqlReaderQuery": "@concat(\n'SELECT * FROM ',\nitem().SchemaName,\n'.',\nitem().TableName,\n' WHERE LastModifiedDate > ''',\nactivity('Lookup_Watermark').output.firstRow.LastLoadDate,\n''''\n)",
+									"sqlReaderQuery": {
+										"value": "@concat(\n'SELECT * FROM ',\nitem().SchemaName,\n'.',\nitem().TableName,\n' WHERE LastModifiedDate > ''',\nactivity('Lookup_Watermark').output.firstRow.LastLoadDate,\n''''\n)",
+										"type": "Expression"
+									},
 									"queryTimeout": "02:00:00",
 									"partitionOption": "None"
 								},
@@ -134,7 +137,7 @@
 								"source": {
 									"type": "AzureSqlSource",
 									"sqlReaderQuery": {
-										"value": "SELECT LastLoadDate\nFROM Watermark_Config\nWHERE TableName = '@{item().TableName}'",
+										"value": "@concat(\n'SELECT LastLoadDate FROM Watermark_Config WHERE TableName = ''',\nitem().TableName,\n''''\n)",
 										"type": "Expression"
 									},
 									"queryTimeout": "02:00:00",
@@ -152,7 +155,7 @@
 							}
 						},
 						{
-							"name": "Update_Watermark_Script",
+							"name": "Update_Watermark",
 							"type": "Script",
 							"dependsOn": [
 								{
@@ -178,18 +181,21 @@
 								"scripts": [
 									{
 										"type": "Query",
-										"text": "UPDATE Watermark_Config\nSET LastLoadDate = GETDATE()\nWHERE TableName = '@{item().TableName}'"
+										"text": {
+											"value": "UPDATE Watermark_Config\nSET LastLoadDate = GETDATE()\nWHERE TableName = '@{item().TableName}'",
+											"type": "Expression"
+										}
 									}
 								],
 								"scriptBlockExecutionTimeout": "02:00:00"
 							}
 						},
 						{
-							"name": "Audit_log_Script",
+							"name": "Audit_log",
 							"type": "Script",
 							"dependsOn": [
 								{
-									"activity": "Update_Watermark_Script",
+									"activity": "Update_Watermark",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -211,7 +217,10 @@
 								"scripts": [
 									{
 										"type": "Query",
-										"text": "INSERT INTO Pipeline_Audit_Log\n(\n    TableName,\n    Status,\n    LoadTime\n)\nVALUES\n(\n    '@{item().TableName}',\n    'Success',\n    GETDATE()\n)"
+										"text": {
+											"value": "INSERT INTO Pipeline_Audit_Log\n(\n    TableName,\n    Status,\n    LoadTime\n)\nVALUES\n(\n    '@{item().TableName}',\n    'Success',\n    GETDATE()\n)",
+											"type": "Expression"
+										}
 									}
 								],
 								"scriptBlockExecutionTimeout": "02:00:00"
